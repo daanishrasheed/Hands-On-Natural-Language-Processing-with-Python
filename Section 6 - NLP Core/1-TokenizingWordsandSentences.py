@@ -4,7 +4,7 @@
 
 # Tokenization of paragraphs/sentences
 import nltk
-nltk.download()
+#nltk.download()
 
 paragraph = """Thank you all so very much. Thank you to the Academy. 
                Thank you to all of you in this room. I have to congratulate 
@@ -41,4 +41,5 @@ sentences = nltk.sent_tokenize(paragraph)
 
 # Tokenizing words
 words = nltk.word_tokenize(paragraph)
+print(words)
                
