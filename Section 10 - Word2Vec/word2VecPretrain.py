@@ -3,7 +3,7 @@
 # Install gensim - pip install gensim
 from gensim.models import KeyedVectors
 
-filename = 'GoogleNews-vectors-negative300.bin'
+filename = 'GoogleNews-vectors-negative300.bin.gz'
 
 model = KeyedVectors.load_word2vec_format(filename, binary=True)
 
