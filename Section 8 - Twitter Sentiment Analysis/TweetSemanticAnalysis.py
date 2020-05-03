@@ -1,47 +1,50 @@
 # Twitter Sentiment Analysis using NLP
-
+# Access token: 1207888491570438144-RG32orydI3YdXHKrgeSQSa118werC6
+# Access token secret: z4RwAfzLpRa04zE1Pq89FOkD0OCkTOnyTSF4uyq9ioKDb
 # Install tweepy - pip install tweepy
 
 # Importing the libraries
 import tweepy
 import re
 import pickle
-
 from tweepy import OAuthHandler
+import matplotlib.pyplot as plt
+import numpy as np
+import warnings
+warnings.filterwarnings("ignore")
 
-# Please change with your own consumer key, consumer secret, access token and access secret
 # Initializing the keys
-consumer_key = 'yoIwFkjZGYDa49aO16XqSNqcN'
-consumer_secret = 'gl4LQOItV7Z1aFwNrlvaiKJ3t8o8h99blMIAmnmdHxYjzjRAxO' 
-access_token = '624310916-E7fDF2IE8P6bfY1oVFglASf6F8RnxMd3vgSXFqnZ'
-access_secret ='ID9JcoXHsDcKtvNcnmBGcCQhUlO0wmwAxBJ6LCesiUAas'
+consumer_key = 'EZgzWSUwrHQj9gV7LR0K9DJrA'
+consumer_secret = 'zPv6j5nFKJCJxnTmIuQuxm6lxoV7BLix1DBY3Adb4RmPd8Ifka'
+access_token = '1207888491570438144-RG32orydI3YdXHKrgeSQSa118werC6'
+access_secret = 'z4RwAfzLpRa04zE1Pq89FOkD0OCkTOnyTSF4uyq9ioKDb'
 
-# Initializing the tokens
-auth = OAuthHandler(consumer_key, consumer_secret)
+auth = OAuthHandler(consumer_key,consumer_secret)
 auth.set_access_token(access_token, access_secret)
-args = ['trump'];
+args = ['facebook']
 api = tweepy.API(auth,timeout=10)
 
-# Fetching the tweets
+
 list_tweets = []
 
 query = args[0]
 if len(args) == 1:
-    for status in tweepy.Cursor(api.search,q=query+" -filter:retweets",lang='en',result_type='recent',geocode="22.1568,89.4332,500km").items(100):
+    for status in tweepy.Cursor(api.search, q=query+" -filter:retweets",lang='en',result_type='recent').items(100):
         list_tweets.append(status.text)
-        
-# Loading the vectorizer and classfier
-with open('classifier.pickle','rb') as f:
-    classifier = pickle.load(f)
-    
+
 with open('tfidfmodel.pickle','rb') as f:
-    tfidf = pickle.load(f)    
-    
-# Preprocessing the tweets and predicting sentiment
+    vectorizer = pickle.load(f)
+
+with open('classifier.pickle','rb') as f:
+    clf = pickle.load(f)
+
+total_pos = 0
+total_neg = 0
+
 for tweet in list_tweets:
-    tweet = re.sub(r"^https://t.co/[a-zA-Z0-9]*\s", " ", tweet)
-    tweet = re.sub(r"\s+https://t.co/[a-zA-Z0-9]*\s", " ", tweet)
-    tweet = re.sub(r"\s+https://t.co/[a-zA-Z0-9]*$", " ", tweet)
+    tweet = re.sub(r"^http://t.co/[a-zA-Z0-9]*\s"," ",tweet)
+    tweet = re.sub(r"\s+https://t.co/9a-zA-Z0-9]*\s"," ",tweet)
+    tweet = re.sub(r"\s+https://t.co/[a-zA-Z0-9]*$"," ",tweet)
     tweet = tweet.lower()
     tweet = re.sub(r"that's","that is",tweet)
     tweet = re.sub(r"there's","there is",tweet)
@@ -66,6 +69,18 @@ for tweet in list_tweets:
     tweet = re.sub(r"\s+[a-z]$"," ",tweet)
     tweet = re.sub(r"^[a-z]\s+"," ",tweet)
     tweet = re.sub(r"\s+"," ",tweet)
-    sent = classifier.predict(tfidf.transform([tweet]).toarray())
-    print(tweet,":",sent)
-    
+    sent = clf.predict(vectorizer.transform([tweet]).toarray())
+    if sent[0] == 1:
+        total_pos += 1
+    else:
+        total_neg += 1
+
+# Plotting the bar chart
+objects = ['Positive', 'Negative']
+y_pos = np.arange(len(objects))
+plt.bar(y_pos,[total_pos,total_neg],alpha=0.5)
+plt.xticks(y_pos,objects)
+plt.ylabel('Number')
+plt.title('Number of Positive and Negative tweets')
+
+plt.show()
